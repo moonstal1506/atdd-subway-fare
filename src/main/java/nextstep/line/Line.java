@@ -20,6 +20,9 @@ public class Line {
     @Column(length = 20, nullable = false)
     private String color;
 
+    @Column(nullable = false)
+    private int extraFare;
+
     @Embedded
     private Sections sections = new Sections();
 
@@ -30,6 +33,11 @@ public class Line {
         this.name = name;
         this.color = color;
         sections.addSection(section);
+    }
+
+    public Line(String name, String color, int extraFare, Section section) {
+        this(name, color, section);
+        this.extraFare = extraFare;
     }
 
     public void update(String name, String color) {
@@ -57,6 +65,10 @@ public class Line {
         return color;
     }
 
+    public int getExtraFare() {
+        return extraFare;
+    }
+
     public List<Section> getSections() {
         return sections.getSections();
     }
@@ -65,4 +77,10 @@ public class Line {
         return sections.getOrderedStations();
     }
 
+    @Override
+    public String toString() {
+        return "Line{" +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

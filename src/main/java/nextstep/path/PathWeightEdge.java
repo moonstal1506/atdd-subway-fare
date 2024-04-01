@@ -1,16 +1,22 @@
 package nextstep.path;
 
+import nextstep.line.Line;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class PathWeightEdge extends DefaultWeightedEdge {
+
+    private Line line;
     private int distance;
     private int duration;
 
-    protected PathWeightEdge() {}
-
-    public PathWeightEdge(int distance, int duration) {
+    public PathWeightEdge(Line line, int distance, int duration) {
+        this.line = line;
         this.distance = distance;
         this.duration = duration;
+    }
+
+    public Line getLine() {
+        return line;
     }
 
     public int getDistance() {

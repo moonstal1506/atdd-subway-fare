@@ -10,6 +10,7 @@ import org.jgrapht.graph.WeightedMultigraph;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SubwayMap {
 
@@ -26,8 +27,9 @@ public class SubwayMap {
 
         int distance = path.getEdgeList().stream().mapToInt(PathWeightEdge::getDistance).sum();
         int duration = path.getEdgeList().stream().mapToInt(PathWeightEdge::getDuration).sum();
+        List<Line> usedLine = path.getEdgeList().stream().map(PathWeightEdge::getLine).distinct().collect(Collectors.toList());
 
-        return new Path(path.getVertexList(), distance, duration);
+        return new Path(path.getVertexList(), distance, duration, usedLine);
     }
 
     private void validateEqualsStation(Station source, Station target) {
@@ -49,18 +51,17 @@ public class SubwayMap {
     private WeightedMultigraph<Station, PathWeightEdge> createGraph(PathType pathType) {
         WeightedMultigraph<Station, PathWeightEdge> graph = new WeightedMultigraph(PathWeightEdge.class);
 
-        lines.stream()
-                .flatMap(line -> line.getSections().stream())
-                .distinct()
+        lines.forEach(line -> line.getSections()
                 .forEach(section -> {
                     Station upStation = section.getUpStation();
                     Station downStation = section.getDownStation();
-                    PathWeightEdge edge = new PathWeightEdge(section.getDistance(), section.getDuration());
+                    PathWeightEdge edge = new PathWeightEdge(line, section.getDistance(), section.getDuration());
                     graph.addVertex(downStation);
                     graph.addVertex(upStation);
                     graph.addEdge(upStation, downStation, edge);
                     graph.setEdgeWeight(edge, pathType.getWeight(section));
-                });
+                }));
+
         return graph;
     }
 
@@ -75,10 +76,17 @@ public class SubwayMap {
         this.findPath(source, target, PathType.DISTANCE);
     }
 
-    public Fare calculateFare(Station source, Station target) {
+    public Fare calculateFare(Station source, Station target, List<Line> usedLine) {
         int shortestDistance = getShortestDistance(source, target);
         FareCalculatorHandler fareCalculatorHandler = buildCalculatorChain();
-        return fareCalculatorHandler.handleFareCalculate(shortestDistance, Fare.DEFAULT_FARE);
+        Fare fare = fareCalculatorHandler.handleFareCalculate(shortestDistance, Fare.DEFAULT_FARE);
+        Fare lineExtraFare = calculateLineExtraFare(usedLine);
+        return fare.plus(lineExtraFare);
+    }
+
+    private int getShortestDistance(Station source, Station target) {
+        GraphPath<Station, PathWeightEdge> graphPath = getGraphPath(source, target, PathType.DISTANCE);
+        return graphPath.getEdgeList().stream().mapToInt(PathWeightEdge::getDistance).sum();
     }
 
     private static FareCalculatorHandler buildCalculatorChain() {
@@ -88,8 +96,12 @@ public class SubwayMap {
         return baseFareCalculator;
     }
 
-    private int getShortestDistance(Station source, Station target) {
-        GraphPath<Station, PathWeightEdge> graphPath = getGraphPath(source, target, PathType.DISTANCE);
-        return graphPath.getEdgeList().stream().mapToInt(PathWeightEdge::getDistance).sum();
+    private Fare calculateLineExtraFare(List<Line> usedLine) {
+        int lineExtraFare = usedLine.stream()
+                .mapToInt(Line::getExtraFare)
+                .max()
+                .orElse(0);
+        return Fare.of(lineExtraFare);
     }
+
 }

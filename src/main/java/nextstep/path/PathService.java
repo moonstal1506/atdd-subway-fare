@@ -30,7 +30,7 @@ public class PathService {
 
         SubwayMap subwayMap = new SubwayMap(lines);
         Path path = subwayMap.findPath(sourceStation, targetStation, type);
-        Fare fare = subwayMap.calculateFare(sourceStation, targetStation);
+        Fare fare = subwayMap.calculateFare(sourceStation, targetStation, path.getUsedLine());
 
         return new PathResponse(path, fare);
     }
