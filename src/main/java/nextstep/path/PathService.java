@@ -28,9 +28,9 @@ public class PathService {
         Station targetStation = stationRepository.findById(target).orElseThrow(() -> new SubwayException("역을 찾을 수 없습니다."));
         List<Line> lines = lineRepository.findAll();
 
-        SubwayMap subwayMap = new SubwayMap(lines, sourceStation, targetStation);
-        Path path = subwayMap.findPath(type);
-        int fare = subwayMap.calculateFare();
+        SubwayMap subwayMap = new SubwayMap(lines);
+        Path path = subwayMap.findPath(sourceStation, targetStation, type);
+        int fare = subwayMap.calculateFare(sourceStation, targetStation);
 
         return new PathResponse(path, fare);
     }

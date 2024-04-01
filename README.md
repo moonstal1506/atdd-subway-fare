@@ -17,8 +17,8 @@
 
 ### 🚀 2단계 - 요금 조회
 - [x] 경로 조회 결과에 요금 정보를 포함
-- [] findPath메서드, calculateFare 메서드를 호출할 때마다 출발지/도착지 파라미터로 전달
-- [] PathFinder의 역할을 SubwayMap이 가져가도록 변경
+- [x] findPath메서드, calculateFare 메서드를 호출할 때마다 출발지/도착지 파라미터로 전달
+- [x] PathFinder의 역할을 SubwayMap이 가져가도록 변경
 - [] 요금을 원시값(int) 대신 사용하는 클래스로 변경
   - 기본요금 제공
   - 요금 덧셈 기능 제공
