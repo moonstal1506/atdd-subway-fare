@@ -2,7 +2,7 @@ package nextstep.path;
 
 import nextstep.exception.SubwayException;
 import nextstep.line.Line;
-import nextstep.path.fare.Fare;
+import nextstep.path.fare.*;
 import nextstep.station.Station;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
@@ -75,9 +75,17 @@ public class SubwayMap {
         this.findPath(source, target, PathType.DISTANCE);
     }
 
-    public int calculateFare(Station source, Station target) {
+    public Fare calculateFare(Station source, Station target) {
         int shortestDistance = getShortestDistance(source, target);
-        return Fare.calculate(shortestDistance);
+        FareCalculatorHandler fareCalculatorHandler = buildCalculatorChain();
+        return fareCalculatorHandler.handleFareCalculate(shortestDistance, Fare.DEFAULT_FARE);
+    }
+
+    private static FareCalculatorHandler buildCalculatorChain() {
+        FareCalculatorHandler baseFareCalculator = new BaseFareCalculator();
+        baseFareCalculator.setNextHandler(new FirstExtraFareCalculator())
+                .setNextHandler(new SecondExtraCalculator());
+        return baseFareCalculator;
     }
 
     private int getShortestDistance(Station source, Station target) {
