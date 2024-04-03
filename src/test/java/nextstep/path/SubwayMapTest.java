@@ -113,7 +113,7 @@ class SubwayMapTest {
     @Test
     void calculateLineExtraFare() {
         SubwayMap subwayMap = new SubwayMap(Arrays.asList(이호선, 신분당선, 삼호선));
-        Fare fare = subwayMap.calculateFare(교대역, 양재역, List.of(이호선, 신분당선));
+        Fare fare = subwayMap.calculateFare(교대역, 양재역, List.of(이호선, 신분당선), 30);
 
         assertThat(fare).isEqualTo(Fare.of(2250));
     }

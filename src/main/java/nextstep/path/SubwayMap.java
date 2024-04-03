@@ -76,12 +76,12 @@ public class SubwayMap {
         this.findPath(source, target, PathType.DISTANCE);
     }
 
-    public Fare calculateFare(Station source, Station target, List<Line> usedLine) {
+    public Fare calculateFare(Station source, Station target, List<Line> usedLine, Integer age) {
         int shortestDistance = getShortestDistance(source, target);
         FareCalculatorHandler fareCalculatorHandler = buildCalculatorChain();
         Fare fare = fareCalculatorHandler.handleFareCalculate(shortestDistance, Fare.DEFAULT_FARE);
         Fare lineExtraFare = calculateLineExtraFare(usedLine);
-        return fare.plus(lineExtraFare);
+        return discount(fare.plus(lineExtraFare), age);
     }
 
     private int getShortestDistance(Station source, Station target) {
@@ -102,6 +102,11 @@ public class SubwayMap {
                 .max()
                 .orElse(0);
         return Fare.of(lineExtraFare);
+    }
+
+    private Fare discount(Fare fare, Integer age) {
+        DiscountPolicy discountPolicy = new DiscountPolicy();
+        return discountPolicy.discount(fare, age);
     }
 
 }
