@@ -29,15 +29,11 @@ public class Line {
     public Line() {
     }
 
-    public Line(String name, String color, Section section) {
+    public Line(String name, String color, int extraFare, Section section) {
         this.name = name;
         this.color = color;
-        sections.addSection(section);
-    }
-
-    public Line(String name, String color, int extraFare, Section section) {
-        this(name, color, section);
         this.extraFare = extraFare;
+        sections.addSection(section);
     }
 
     public void update(String name, String color) {

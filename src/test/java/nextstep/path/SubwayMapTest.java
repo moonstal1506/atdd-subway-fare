@@ -51,8 +51,8 @@ class SubwayMapTest {
 
         이호선 = new Line("2호선", "green", 500, 교대_강남_구간);
         신분당선 = new Line("신분당선", "red", 1000, 강남_양재_구간);
-        삼호선 = new Line("3호선", "orange", 교대_남부터미널_구간);
-        수인분당선 = new Line("수인분당선", "yellow", 수내_정자_구간);
+        삼호선 = new Line("3호선", "orange", 0, 교대_남부터미널_구간);
+        수인분당선 = new Line("수인분당선", "yellow", 0, 수내_정자_구간);
 
         삼호선.addSection(new Section(남부터미널역, 양재역, 3, 6));
     }
