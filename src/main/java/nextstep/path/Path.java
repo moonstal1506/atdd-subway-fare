@@ -4,19 +4,16 @@ import nextstep.line.Line;
 import nextstep.station.Station;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Path {
 
     private List<Station> stations;
-    private int distance;
-    private int duration;
-    private List<Line> usedLine;
+    private List<PathSection> pathSections;
 
-    public Path(List<Station> stations, int distance, int duration, List<Line> usedLine) {
+    public Path(List<Station> stations, List<PathSection> pathSections) {
         this.stations = stations;
-        this.distance = distance;
-        this.duration = duration;
-        this.usedLine = usedLine;
+        this.pathSections = pathSections;
     }
 
     public List<Station> getStations() {
@@ -24,14 +21,14 @@ public class Path {
     }
 
     public int getDistance() {
-        return distance;
+        return pathSections.stream().mapToInt(PathSection::getDistance).sum();
     }
 
     public int getDuration() {
-        return duration;
+        return pathSections.stream().mapToInt(PathSection::getDuration).sum();
     }
 
     public List<Line> getUsedLine() {
-        return usedLine;
+        return pathSections.stream().map(PathSection::getLine).distinct().collect(Collectors.toList());
     }
 }

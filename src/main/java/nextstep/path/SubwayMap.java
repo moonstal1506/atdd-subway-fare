@@ -10,7 +10,6 @@ import org.jgrapht.graph.WeightedMultigraph;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SubwayMap {
 
@@ -22,14 +21,8 @@ public class SubwayMap {
 
     public Path findPath(Station source, Station target, PathType pathType) {
         validateEqualsStation(source, target);
-
-        GraphPath<Station, PathWeightEdge> path = getGraphPath(source, target, pathType);
-
-        int distance = path.getEdgeList().stream().mapToInt(PathWeightEdge::getDistance).sum();
-        int duration = path.getEdgeList().stream().mapToInt(PathWeightEdge::getDuration).sum();
-        List<Line> usedLine = path.getEdgeList().stream().map(PathWeightEdge::getLine).distinct().collect(Collectors.toList());
-
-        return new Path(path.getVertexList(), distance, duration, usedLine);
+        GraphPath<Station, PathSection> path = getGraphPath(source, target, pathType);
+        return new Path(path.getVertexList(), path.getEdgeList());
     }
 
     private void validateEqualsStation(Station source, Station target) {
@@ -38,24 +31,24 @@ public class SubwayMap {
         }
     }
 
-    private GraphPath<Station, PathWeightEdge> getGraphPath(Station source, Station target, PathType pathType) {
-        WeightedMultigraph<Station, PathWeightEdge> graph = createGraph(pathType);
+    private GraphPath<Station, PathSection> getGraphPath(Station source, Station target, PathType pathType) {
+        WeightedMultigraph<Station, PathSection> graph = createGraph(pathType);
         validateStationExists(graph, source, target);
 
         DijkstraShortestPath dijkstraShortestPath = new DijkstraShortestPath(graph);
-        GraphPath<Station, PathWeightEdge> path = Optional.ofNullable(dijkstraShortestPath.getPath(source, target))
+        GraphPath<Station, PathSection> path = Optional.ofNullable(dijkstraShortestPath.getPath(source, target))
                 .orElseThrow(() -> new SubwayException("출발역과 도착역이 연결이 되어 있지 않습니다."));
         return path;
     }
 
-    private WeightedMultigraph<Station, PathWeightEdge> createGraph(PathType pathType) {
-        WeightedMultigraph<Station, PathWeightEdge> graph = new WeightedMultigraph(PathWeightEdge.class);
+    private WeightedMultigraph<Station, PathSection> createGraph(PathType pathType) {
+        WeightedMultigraph<Station, PathSection> graph = new WeightedMultigraph(PathSection.class);
 
         lines.forEach(line -> line.getSections()
                 .forEach(section -> {
                     Station upStation = section.getUpStation();
                     Station downStation = section.getDownStation();
-                    PathWeightEdge edge = new PathWeightEdge(line, section.getDistance(), section.getDuration());
+                    PathSection edge = new PathSection(line, section);
                     graph.addVertex(downStation);
                     graph.addVertex(upStation);
                     graph.addEdge(upStation, downStation, edge);
@@ -65,7 +58,7 @@ public class SubwayMap {
         return graph;
     }
 
-    private void validateStationExists(WeightedMultigraph<Station, PathWeightEdge> graph,
+    private void validateStationExists(WeightedMultigraph<Station, PathSection> graph,
                                        Station source, Station target) {
         if (!graph.containsVertex(source) || !graph.containsVertex(target)) {
             throw new SubwayException("존재하지 않은 역입니다.");
@@ -85,8 +78,8 @@ public class SubwayMap {
     }
 
     private int getShortestDistance(Station source, Station target) {
-        GraphPath<Station, PathWeightEdge> graphPath = getGraphPath(source, target, PathType.DISTANCE);
-        return graphPath.getEdgeList().stream().mapToInt(PathWeightEdge::getDistance).sum();
+        GraphPath<Station, PathSection> graphPath = getGraphPath(source, target, PathType.DISTANCE);
+        return graphPath.getEdgeList().stream().mapToInt(PathSection::getDistance).sum();
     }
 
     private static FareCalculatorHandler buildCalculatorChain() {
